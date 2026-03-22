@@ -1,12 +1,12 @@
 // ===== Config =====
-const LINE_STAGGER = 0.12;
+const LINE_STAGGER = 0;
 const CHAR_STAGGER = 0.02;
 const SCROLL_RANGE_VH = 0.45;
 
 // Image config
 const IMG_START_WIDTH = 85;   // % of viewport
 const IMG_END_WIDTH = 100;    // vw
-const IMG_START_RADIUS = 24;  // px
+const IMG_START_RADIUS = 48;  // px
 
 // ===== DOM Elements =====
 const slideOne = document.getElementById('slideOne');
@@ -61,12 +61,18 @@ function update() {
   const scrollRange = windowH * SCROLL_RANGE_VH;
 
   // --- Phase 1: Cascade text animation (per-letter) ---
+  // All lines finish in the same scroll distance regardless of character count
+  const CASCADE_FINISH = scrollRange * 0.7; // all lines done by this scroll point
+
   cascadeLines.forEach(({ order, chars }) => {
-    const lineStart = order * LINE_STAGGER * scrollRange;
+    const lineStart = 0;
+    const charCount = chars.length || 1;
+    // Spread characters evenly across the cascade window
+    const perCharDelay = (CASCADE_FINISH * 0.5) / charCount;
 
     chars.forEach((charSpan, i) => {
-      const charStart = lineStart + i * CHAR_STAGGER * scrollRange;
-      const charEnd = charStart + scrollRange * 0.35;
+      const charStart = lineStart + i * perCharDelay;
+      const charEnd = charStart + CASCADE_FINISH * 0.5;
 
       if (scrollY <= charStart) {
         charSpan.style.transform = 'translateY(0) rotate(0deg)';
@@ -102,21 +108,23 @@ function update() {
     }
   }
 
-  // --- Slide-one fade out ---
-  const fadeStart = scrollRange * 0.5;
-  const fadeEnd = scrollRange * 1.0;
-  if (scrollY <= fadeStart) {
-    slideOne.style.opacity = '1';
-  } else if (scrollY >= fadeEnd) {
-    slideOne.style.opacity = '0';
+  // --- Slide-one height shrink (synced with image expansion) ---
+  // Uses the same expandStart/expandEnd as the image, calculated below
+  const expandStartVal = 0;
+  const expandEndVal = windowH * 0.8;
+  const slideStartH = windowH * 0.82; // 82vh
+
+  if (scrollY <= expandStartVal) {
+    slideOne.style.height = `${slideStartH}px`;
+    slideOne.style.pointerEvents = 'auto';
+  } else if (scrollY >= expandEndVal) {
+    slideOne.style.height = '0px';
     slideOne.style.pointerEvents = 'none';
   } else {
-    const p = (scrollY - fadeStart) / (fadeEnd - fadeStart);
-    slideOne.style.opacity = `${1 - easeOutCubic(p)}`;
-    slideOne.style.pointerEvents = 'none';
-  }
-  if (scrollY < fadeStart) {
-    slideOne.style.pointerEvents = 'auto';
+    const p = (scrollY - expandStartVal) / (expandEndVal - expandStartVal);
+    const eased = easeInOutCubic(p);
+    slideOne.style.height = `${slideStartH * (1 - eased)}px`;
+    slideOne.style.pointerEvents = eased > 0.5 ? 'none' : 'auto';
   }
 
   // --- Phase 2 & 3: Image expansion + scroll up ---
@@ -125,7 +133,7 @@ function update() {
   const imgNaturalH = heroFullImg.naturalHeight || 1;
 
   // Phase 2: expand width + reduce radius (happens during/after text cascade)
-  const expandStart = scrollRange * 0.6;
+  const expandStart = 0;
   const expandEnd = expandStart + windowH * 0.8;
 
   // Phase 3: scroll image up to reveal full image

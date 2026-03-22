@@ -92,7 +92,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.15s linear;
+  overflow: hidden;
 }
 
 /* Hero content area */
@@ -222,7 +222,7 @@ body {
 
 .hero-image-container {
   width: 85%;
-  border-radius: 24px 24px 0 0;
+  border-radius: 48px 48px 0 0;
   overflow: hidden;
   will-change: transform, width, border-radius;
 }
