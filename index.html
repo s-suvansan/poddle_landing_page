@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poddle — More customers. Zero ad spend.</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="poddle_logo.webp" alt="Poddle">
+      </a>
+      <div class="nav-actions" id="navActions">
+        <a href="#" class="nav-link">Book a Call</a>
+        <a href="#" class="nav-btn-primary">Join Waitlist</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero text overlay (fixed, covers top ~70vh with white bg) -->
+  <section class="slide-one" id="slideOne">
+    <div class="hero" id="hero">
+      <div class="hero-content" id="heroContent">
+        <h1 class="hero-title">
+          <span class="cascade-text" data-cascade-order="0">More customers.</span>
+          <span class="cascade-text" data-cascade-order="1">Zero ad spend.</span>
+        </h1>
+        <p class="hero-subtitle cascade-text" data-cascade-order="2">The poddle activates your loyal regulars to refer friends, boost your reviews, and spread word-of-mouth — while you focus on your business.</p>
+        <div class="mask-wrap" data-mask-order="3">
+          <div class="hero-ctas mask-inner">
+            <a href="#" class="btn-waitlist">Join the Waitlist</a>
+            <a href="#" class="btn-call">Book a Call →</a>
+          </div>
+        </div>
+        <p class="hero-disclaimer cascade-text" data-cascade-order="4">No payment. No obligation. Currently accepting early applications.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Single image — starts at 85% width, top ~30% visible below hero on load -->
+  <div class="hero-image-wrapper" id="heroImageWrapper">
+    <div class="hero-image-container" id="heroImageContainer">
+      <img src="hero.jpg" alt="Hero" class="hero-full-img" id="heroFullImg">
+    </div>
+  </div>
+
+  <!-- Scroll space for image expansion + pan -->
+  <div class="scroll-space" id="scrollSpace"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
