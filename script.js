@@ -10,6 +10,7 @@ const IMG_START_RADIUS = 48;  // px
 
 // ===== DOM Elements =====
 const slideOne = document.getElementById('slideOne');
+const navActions = document.getElementById('navActions');
 const heroImageWrapper = document.getElementById('heroImageWrapper');
 const heroImageContainer = document.getElementById('heroImageContainer');
 const heroFullImg = document.getElementById('heroFullImg');
@@ -83,10 +84,10 @@ function update() {
   });
 
   // Button mask animation (block slide up)
-  if (maskInner) {
-    const btnStart = maskOrder * LINE_STAGGER * scrollRange;
-    const btnEnd = btnStart + scrollRange * 0.5;
+  const btnStart = maskOrder * LINE_STAGGER * scrollRange;
+  const btnEnd = btnStart + scrollRange * 0.5;
 
+  if (maskInner) {
     if (scrollY <= btnStart) {
       maskInner.style.transform = 'translateY(0)';
       maskInner.style.opacity = '1';
@@ -99,6 +100,13 @@ function update() {
       maskInner.style.transform = `translateY(${-eased * 100}%)`;
       maskInner.style.opacity = `${1 - eased}`;
     }
+  }
+
+  // --- Show/hide nav buttons based on hero CTA visibility ---
+  if (scrollY >= btnEnd) {
+    navActions.classList.add('visible');
+  } else {
+    navActions.classList.remove('visible');
   }
 
   // --- Slide-one height shrink (synced with image expansion) ---
