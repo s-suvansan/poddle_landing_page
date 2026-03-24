@@ -236,7 +236,7 @@ body {
 
 /* Scroll space — provides room for all animation phases */
 .scroll-space {
-  height: 500vh; /* default, JS will adjust once image loads */
+  height: 800vh; /* default, JS will adjust once image loads */
 }
 
 /* ===== Mobile Responsive ===== */

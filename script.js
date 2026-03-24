@@ -1,7 +1,7 @@
 // ===== Config =====
 const LINE_STAGGER = 0;
 const CHAR_STAGGER = 0.02;
-const SCROLL_RANGE_VH = 0.45;
+const SCROLL_RANGE_VH = 1.2;
 
 // Image config
 const IMG_START_WIDTH = 85;   // % of viewport
@@ -46,13 +46,6 @@ const maskOrder = maskWrap ? parseInt(maskWrap.dataset.maskOrder, 10) : 3;
 
 // ===== Scroll Handler =====
 let ticking = false;
-
-function onScroll() {
-  if (!ticking) {
-    requestAnimationFrame(update);
-    ticking = true;
-  }
-}
 
 function update() {
   ticking = false;
@@ -111,7 +104,7 @@ function update() {
   // --- Slide-one height shrink (synced with image expansion) ---
   // Uses the same expandStart/expandEnd as the image, calculated below
   const expandStartVal = 0;
-  const expandEndVal = windowH * 0.8;
+  const expandEndVal = windowH * 2.0;
   const slideStartH = windowH * 0.82; // 82vh
 
   if (scrollY <= expandStartVal) {
@@ -134,7 +127,7 @@ function update() {
 
   // Phase 2: expand width + reduce radius (happens during/after text cascade)
   const expandStart = 0;
-  const expandEnd = expandStart + windowH * 0.8;
+  const expandEnd = expandStart + windowH * 2.0;
 
   // Phase 3: scroll image up to reveal full image
   const panStart = expandEnd;
@@ -193,8 +186,27 @@ function easeInOutCubic(t) {
     : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+// ===== Lenis Smooth Scroll =====
+const lenis = new Lenis({
+  lerp: 0.07,
+  duration: 1.5,
+  smoothWheel: true,
+});
+
+lenis.on('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(update);
+    ticking = true;
+  }
+});
+
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
 // ===== Init =====
-window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', () => {
   requestAnimationFrame(update);
 }, { passive: true });
