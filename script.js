@@ -24,18 +24,30 @@ document.querySelectorAll('.cascade-text').forEach((el) => {
   el.textContent = '';
 
   const chars = [];
-  for (let i = 0; i < text.length; i++) {
-    const span = document.createElement('span');
-    span.className = 'cascade-char';
-    if (text[i] === ' ') {
-      span.innerHTML = '&nbsp;';
-      span.classList.add('is-space');
-    } else {
-      span.textContent = text[i];
+  const words = text.split(' ');
+  words.forEach((word, wIdx) => {
+    const wordWrap = document.createElement('span');
+    wordWrap.className = 'cascade-word';
+
+    for (let i = 0; i < word.length; i++) {
+      const span = document.createElement('span');
+      span.className = 'cascade-char';
+      span.textContent = word[i];
+      wordWrap.appendChild(span);
+      chars.push(span);
     }
-    el.appendChild(span);
-    chars.push(span);
-  }
+
+    el.appendChild(wordWrap);
+
+    // Add space between words (not after last word)
+    if (wIdx < words.length - 1) {
+      const space = document.createElement('span');
+      space.className = 'cascade-char is-space';
+      space.innerHTML = '&nbsp;';
+      el.appendChild(space);
+      chars.push(space);
+    }
+  });
 
   cascadeLines.push({ el, order, chars });
 });
