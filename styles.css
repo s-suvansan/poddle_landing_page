@@ -103,6 +103,12 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-one.collapsed {
+  height: 0;
+  pointer-events: none;
 }
 
 /* Hero content area */
@@ -237,13 +243,24 @@ body {
   justify-content: center;
   pointer-events: none;
   overflow: hidden;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-image-wrapper.expanded {
+  height: 100vh;
 }
 
 .hero-image-container {
   width: 85%;
   border-radius: 48px 48px 0 0;
   overflow: hidden;
-  will-change: transform, width, border-radius;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              border-radius 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-image-container.expanded {
+  width: 100vw;
+  border-radius: 0;
 }
 
 .hero-full-img {
@@ -255,7 +272,7 @@ body {
 
 /* Scroll space — provides room for all animation phases */
 .scroll-space {
-  height: 800vh; /* default, JS will adjust once image loads */
+  height: 200vh; /* enough scroll for text cascade + expansion trigger */
 }
 
 /* ===== Mobile Responsive ===== */

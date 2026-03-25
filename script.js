@@ -121,78 +121,23 @@ function update() {
     navActions.classList.remove('visible');
   }
 
-  // --- Slide-one height shrink (synced with image expansion) ---
-  // Uses the same expandStart/expandEnd as the image, calculated below
-  const expandStartVal = 0;
-  const expandEndVal = windowH * 2.0;
-  const slideStartH = windowH * 0.82; // 82vh
+  // --- Image expansion: auto-trigger via CSS transition ---
+  const expandTrigger = scrollRange * 0.1; // trigger very early, near start of cascade
 
-  if (scrollY <= expandStartVal) {
-    slideOne.style.height = `${slideStartH}px`;
-    slideOne.style.pointerEvents = 'auto';
-  } else if (scrollY >= expandEndVal) {
-    slideOne.style.height = '0px';
-    slideOne.style.pointerEvents = 'none';
+  if (scrollY >= expandTrigger) {
+    // Expand image to full page + collapse slide-one
+    heroImageWrapper.classList.add('expanded');
+    heroImageContainer.classList.add('expanded');
+    slideOne.classList.add('collapsed');
   } else {
-    const p = (scrollY - expandStartVal) / (expandEndVal - expandStartVal);
-    const eased = easeInOutCubic(p);
-    slideOne.style.height = `${slideStartH * (1 - eased)}px`;
-    slideOne.style.pointerEvents = eased > 0.5 ? 'none' : 'auto';
+    // Shrink back to peek state
+    heroImageWrapper.classList.remove('expanded');
+    heroImageContainer.classList.remove('expanded');
+    slideOne.classList.remove('collapsed');
   }
 
-  // --- Phase 2 & 3: Image expansion + scroll up ---
-  // Image natural dimensions
-  const imgNaturalW = heroFullImg.naturalWidth || 1;
-  const imgNaturalH = heroFullImg.naturalHeight || 1;
-
-  // Phase 2: expand width + reduce radius (happens during/after text cascade)
-  const expandStart = 0;
-  const expandEnd = expandStart + windowH * 2.0;
-
-  // Phase 3: scroll image up to reveal full image
-  const panStart = expandEnd;
-  // Calculate how tall the image will be at full viewport width
-  const imgFullDisplayH = (window.innerWidth / imgNaturalW) * imgNaturalH;
-  const maxPan = Math.max(0, imgFullDisplayH - windowH);
-  const panEnd = panStart + maxPan;
-
-  // Set total scroll space (only once image is loaded)
-  if (imgNaturalW > 1) {
-    const totalNeeded = panEnd + windowH;
-    document.getElementById('scrollSpace').style.height = `${totalNeeded}px`;
-  }
-
-  // Wrapper starts at 18vh height pinned to the bottom. On expansion it grows to 100vh.
-  const startH = windowH * 0.18; // 18vh
-
-  if (scrollY < expandStart) {
-    // Before expansion: initial state
-    heroImageContainer.style.width = `${IMG_START_WIDTH}%`;
-    heroImageContainer.style.borderRadius = `${IMG_START_RADIUS}px ${IMG_START_RADIUS}px 0 0`;
-    heroImageWrapper.style.height = `${startH}px`;
-    heroFullImg.style.transform = 'translateY(0)';
-  } else if (scrollY >= expandStart && scrollY < expandEnd) {
-    // During expansion: width grows, radius shrinks, wrapper height grows
-    const progress = (scrollY - expandStart) / (expandEnd - expandStart);
-    const eased = easeInOutCubic(progress);
-
-    const width = IMG_START_WIDTH + (IMG_END_WIDTH - IMG_START_WIDTH) * eased;
-    const radius = IMG_START_RADIUS * (1 - eased);
-    const wrapH = startH + (windowH - startH) * eased; // 18vh → 100vh
-
-    heroImageContainer.style.width = `${width}vw`;
-    heroImageContainer.style.borderRadius = `${radius}px ${radius}px 0 0`;
-    heroImageWrapper.style.height = `${wrapH}px`;
-    heroFullImg.style.transform = 'translateY(0)';
-  } else if (scrollY >= panStart) {
-    // Phase 3: full width, pan image up to reveal whole thing
-    heroImageContainer.style.width = '100vw';
-    heroImageContainer.style.borderRadius = '0px';
-    heroImageWrapper.style.height = '100vh';
-
-    const panProgress = Math.min(1, (scrollY - panStart) / (panEnd - panStart));
-    heroFullImg.style.transform = `translateY(${-panProgress * maxPan}px)`;
-  }
+  // Image stays fixed once expanded — no further scrolling
+  heroFullImg.style.transform = 'translateY(0)';
 }
 
 // ===== Easing Functions =====
