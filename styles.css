@@ -13,7 +13,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #1a1a1a;
   background: #ffffff;
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -146,6 +147,17 @@ body {
   vertical-align: top;
 }
 
+@keyframes cascadeOut {
+  to {
+    transform: translateY(-110%) rotate(-8deg);
+    opacity: 0;
+  }
+}
+
+.cascade-char.animate-out {
+  animation: cascadeOut 0.35s ease-out forwards;
+}
+
 .cascade-char.is-space {
   width: 0.3em;
 }
@@ -158,6 +170,12 @@ body {
 
 .mask-inner {
   will-change: transform;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mask-inner.mask-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 .hero-title {
@@ -246,6 +264,101 @@ body {
   transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  width: 80%;
+}
+
+.overlay-text.visible {
+  opacity: 1;
+}
+
+/* ===== Pain Section ===== */
+.pain-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 8;
+  display: flex;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.pain-images-panel {
+  width: 50%;
+  position: relative;
+}
+
+.pain-img {
+  position: absolute;
+  top: 10%;
+  left: 8%;
+  width: 84%;
+  height: 80%;
+  object-fit: cover;
+  border-radius: 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.pain-img.active {
+  opacity: 1;
+}
+
+.pain-text-panel {
+  width: 50%;
+  position: relative;
+}
+
+.pain-item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 60px 0 40px;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pain-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pain-title {
+  font-size: clamp(28px, 3.2vw, 46px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.pain-body {
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 400;
+  max-width: 480px;
+}
+
 .hero-image-wrapper.expanded {
   height: 100vh;
 }
@@ -270,9 +383,9 @@ body {
   will-change: transform;
 }
 
-/* Scroll space — provides room for all animation phases */
+/* Scroll space — not used in slide mode */
 .scroll-space {
-  height: 200vh; /* enough scroll for text cascade + expansion trigger */
+  display: none;
 }
 
 /* ===== Mobile Responsive ===== */
