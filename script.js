@@ -48,6 +48,27 @@ document.querySelectorAll('.cascade-text').forEach((el) => {
 const maskWrap  = document.querySelector('.mask-wrap');
 const maskInner = maskWrap ? maskWrap.querySelector('.mask-inner') : null;
 
+// ===== Overlay block-sweep init =====
+function initOverlayBlockReveal() {
+  if (!overlayText) return;
+  overlayText.querySelectorAll('p').forEach(p => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:relative;overflow:hidden;display:block;';
+
+    const block = document.createElement('div');
+    block.className = 'overlay-sweep-block';
+    block.style.cssText =
+      'position:absolute;top:0;left:0;width:100%;height:100%;' +
+      'background:#fff;z-index:2;transform:scaleX(0);transform-origin:left center;';
+
+    p.parentNode.insertBefore(wrapper, p);
+    wrapper.appendChild(p);
+    wrapper.appendChild(block);
+    p.style.opacity = '0';
+  });
+}
+initOverlayBlockReveal();
+
 // ===== Slide State Machine =====
 // 0 = hero, 1 = expand + cascade + overlay, 2/3/4 = pain points
 let slideIndex             = 0;
@@ -56,6 +77,7 @@ let painSectionFirstShown  = false;
 let painHideTimer          = null;
 let isAnimating    = false;
 let scrollCooldown = false;
+let overlayAnimated = false;
 
 function goToSlide(next) {
   next = Math.max(0, Math.min(TOTAL_SLIDES - 1, next));
@@ -83,8 +105,20 @@ function applyState(index, prev) {
     resetCascade();
   }
 
-  // --- Overlay text — stays visible on pain slides (pain section covers it) ---
-  if (overlayText) overlayText.classList.toggle('visible', index >= 1);
+  // --- Overlay text — block-sweep reveal after image expansion (800ms), reset on return to slide 0 ---
+  if (overlayText) {
+    if (index >= 1) {
+      if (!overlayAnimated) {
+        overlayAnimated = true;
+        setTimeout(() => {
+          overlayText.classList.add('visible');
+          triggerOverlayReveal();
+        }, 600);
+      }
+    } else {
+      resetOverlay();
+    }
+  }
 
   // --- Pain section: slide up on entry, slide down on exit ---
   if (painSection) painSection.classList.toggle('active', index >= 2);
@@ -167,6 +201,72 @@ function resetCascade() {
       char.style.animationDelay = '';
     });
   });
+}
+
+// ===== Overlay sweep animation =====
+function triggerOverlayReveal() {
+  if (!overlayText) return;
+  const DURATION = 600;
+  const STAGGER  = 150;
+
+  overlayText.querySelectorAll('.overlay-sweep-block').forEach((block, i) => {
+    const p = block.previousElementSibling;
+    const delay = i * STAGGER;
+
+    setTimeout(() => {
+      // A: sweep block left → right
+      block.style.transformOrigin = 'left center';
+      block.animate(
+        [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+        { duration: DURATION, fill: 'forwards', easing: 'cubic-bezier(0.76,0,0.24,1)' }
+      );
+
+      // B: reveal text at midpoint
+      setTimeout(() => { if (p) p.style.opacity = '1'; }, DURATION / 2);
+
+      // C: sweep block off right → left (starts at 60% of entry)
+      setTimeout(() => {
+        block.style.transformOrigin = 'right center';
+        block.animate(
+          [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+          { duration: DURATION, fill: 'forwards', easing: 'cubic-bezier(0.76,0,0.24,1)' }
+        );
+      }, DURATION * 0.6);
+
+    }, delay);
+  });
+}
+
+function resetOverlay() {
+  if (!overlayText) return;
+  overlayAnimated = false;
+  const FADE = 400;
+
+  // Fade out any visible paragraph text
+  overlayText.querySelectorAll('.overlay-sweep-block').forEach(block => {
+    const p = block.previousElementSibling;
+    if (p && p.style.opacity !== '0') {
+      p.animate(
+        [{ opacity: '1' }, { opacity: '0' }],
+        { duration: FADE, fill: 'forwards', easing: 'ease' }
+      );
+    }
+  });
+
+  // After fade, snap everything clean and hide container
+  setTimeout(() => {
+    overlayText.classList.remove('visible');
+    overlayText.querySelectorAll('.overlay-sweep-block').forEach(block => {
+      block.getAnimations().forEach(a => a.cancel());
+      block.style.transform = 'scaleX(0)';
+      block.style.transformOrigin = 'left center';
+      const p = block.previousElementSibling;
+      if (p) {
+        p.getAnimations().forEach(a => a.cancel());
+        p.style.opacity = '0';
+      }
+    });
+  }, FADE);
 }
 
 // ===== Wheel input =====
