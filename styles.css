@@ -298,28 +298,30 @@ body {
   align-items: stretch;
   pointer-events: none;
   visibility: hidden;
+  background: #0f0f0f;
 }
 
 .pain-section.active {
   visibility: visible;
 }
 
+/* 60% image panel */
 .pain-images-panel {
-  width: 50%;
+  width: 60%;
   position: relative;
+  overflow: hidden;
 }
 
+/* Images fill the full panel */
 .pain-img {
   position: absolute;
-  top: 12%;
-  left: 8%;
-  width: 84%;
-  height: 76%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 20px;
+  border-radius: 0;
   opacity: 0;
   transform: scale(1);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -328,38 +330,34 @@ body {
   opacity: 1;
 }
 
+/* Gradient bridge — image bleeds into the dark text area */
+.pain-images-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    transparent 45%,
+    rgba(15, 15, 15, 0.6) 72%,
+    #0f0f0f 100%
+  );
+  pointer-events: none;
+}
+
+/* 40% text panel */
 .pain-text-panel {
-  width: 50%;
+  width: 40%;
   position: relative;
 }
 
-/* Pink accent bar on left edge of text panel */
-.pain-text-panel::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 72px;
-  background: #FF2D78;
-  border-radius: 2px;
-}
-
-/* Ghost step number behind the title */
-.pain-step-number {
-  position: absolute;
-  top: 50%;
-  left: 44px;
-  transform: translateY(-78%);
-  font-size: clamp(96px, 13vw, 172px);
-  font-weight: 900;
-  line-height: 1;
+/* Step counter */
+.pain-eyebrow {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
   color: #FF2D78;
-  opacity: 0.07;
-  pointer-events: none;
-  user-select: none;
-  letter-spacing: -6px;
+  margin-bottom: 16px;
 }
 
 .pain-item {
@@ -368,7 +366,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 60px 0 50px;
+  padding: 0 50px 0 44px;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0, 0, 1);
@@ -383,7 +381,7 @@ body {
 .pain-nav-dots {
   position: absolute;
   bottom: 12%;
-  left: 50px;
+  left: 44px;
   display: flex;
   gap: 10px;
   align-items: center;
