@@ -294,7 +294,8 @@ body {
   right: 0;
   bottom: 0;
   z-index: 8;
-  overflow: hidden;
+  display: flex;
+  align-items: stretch;
   pointer-events: none;
   visibility: hidden;
 }
@@ -304,38 +305,23 @@ body {
 }
 
 .pain-images-panel {
-  position: absolute;
-  inset: 0;
-}
-
-/* Cinematic gradient: image shows left, dark overlay on right for text legibility */
-.pain-images-panel::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.10) 0%,
-    rgba(0, 0, 0, 0.20) 35%,
-    rgba(0, 0, 0, 0.75) 58%,
-    rgba(0, 0, 0, 0.93) 75%,
-    rgba(0, 0, 0, 0.97) 100%
-  );
-  pointer-events: none;
-  z-index: 2;
+  width: 50%;
+  position: relative;
 }
 
 .pain-img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 12%;
+  left: 8%;
+  width: 84%;
+  height: 76%;
   object-fit: cover;
-  border-radius: 0;
+  border-radius: 20px;
   opacity: 0;
   transform: scale(1);
-  transition: opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pain-img.active {
@@ -343,12 +329,37 @@ body {
 }
 
 .pain-text-panel {
+  width: 50%;
+  position: relative;
+}
+
+/* Pink accent bar on left edge of text panel */
+.pain-text-panel::before {
+  content: '';
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 46%;
-  z-index: 5;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 72px;
+  background: #FF2D78;
+  border-radius: 2px;
+}
+
+/* Ghost step number behind the title */
+.pain-step-number {
+  position: absolute;
+  top: 50%;
+  left: 44px;
+  transform: translateY(-78%);
+  font-size: clamp(96px, 13vw, 172px);
+  font-weight: 900;
+  line-height: 1;
+  color: #FF2D78;
+  opacity: 0.07;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -6px;
 }
 
 .pain-item {
@@ -357,15 +368,40 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 70px 0 30px;
+  padding: 0 60px 0 50px;
   opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.2, 0, 0, 1);
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .pain-item.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Navigation dots */
+.pain-nav-dots {
+  position: absolute;
+  bottom: 12%;
+  left: 50px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pain-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.pain-nav-dot.active {
+  background: #FF2D78;
+  border-color: #FF2D78;
+  transform: scale(1.25);
 }
 
 .pain-title {
