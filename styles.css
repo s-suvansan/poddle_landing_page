@@ -26,10 +26,7 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: none;
+  background: transparent;
 }
 
 .nav-inner {
@@ -164,7 +161,6 @@ body {
 
 /* Mask wrapper — for buttons */
 .mask-wrap {
-  overflow: hidden;
   position: relative;
 }
 
@@ -205,42 +201,96 @@ body {
   flex-wrap: wrap;
 }
 
-.btn-waitlist {
+/* Shared liquid glass base */
+.btn-waitlist,
+.btn-call {
+  position: relative;
   display: inline-block;
   padding: 14px 32px;
-  background: #ff3b8a;
-  color: #fff;
   text-decoration: none;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 10px;
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 14px rgba(255, 59, 138, 0.3);
+  border-radius: 980px;
+  isolation: isolate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Specular top highlight — bright strip that makes it look like glass */
+.btn-waitlist::before,
+.btn-call::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 12%; right: 12%;
+  height: 55%;
+  border-radius: 980px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Bottom inner reflection */
+.btn-waitlist::after,
+.btn-call::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 15%; right: 15%;
+  height: 30%;
+  border-radius: 0 0 980px 980px;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.btn-waitlist {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 80, 150, 0.85) 0%,
+    rgba(220, 30, 100, 0.9) 100%
+  );
+  color: #fff;
+  border: 1px solid rgba(255, 130, 175, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.15) inset,
+    0 8px 32px rgba(255, 45, 120, 0.4),
+    0 2px 8px rgba(0,0,0,0.15);
 }
 
 .btn-waitlist:hover {
-  background: #e6306f;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 59, 138, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.2) inset,
+    0 12px 40px rgba(255, 45, 120, 0.55),
+    0 4px 12px rgba(0,0,0,0.2);
 }
 
 .btn-call {
-  display: inline-block;
-  padding: 14px 32px;
-  background: #fff;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(230, 230, 240, 0.75) 100%
+  );
   color: #1a1a1a;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: 2px solid #e0e0e0;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.6) inset,
+    0 6px 24px rgba(0, 0, 0, 0.1),
+    0 2px 6px rgba(0,0,0,0.08);
 }
 
 .btn-call:hover {
-  border-color: #ff3b8a;
-  color: #ff3b8a;
   transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.8) inset,
+    0 10px 32px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0,0,0,0.1);
 }
 
 .hero-disclaimer {
