@@ -8,6 +8,7 @@ const painSection        = document.getElementById('painSection');
 const painItems          = document.querySelectorAll('.pain-item');
 const painImgs           = document.querySelectorAll('.pain-img');
 const painNavDots        = document.querySelectorAll('.pain-nav-dot');
+const painBgNumber       = document.getElementById('painBgNumber');
 
 // ===== Split hero text into character spans =====
 const cascadeLines = [];
@@ -85,9 +86,10 @@ function applyState(index, prev) {
   // --- Overlay text (appears with expansion on slide 1) ---
   if (overlayText) overlayText.classList.toggle('visible', index === 1);
 
-  // --- Pain section visibility + nav dots ---
+  // --- Pain section visibility + nav dots + bg number ---
   if (painSection) painSection.classList.toggle('active', index >= 2);
   painNavDots.forEach((dot, i) => dot.classList.toggle('active', index === i + 2));
+  if (painBgNumber && index >= 2) painBgNumber.textContent = String(index - 1).padStart(2, '0');
 
   // --- Pain points ---
   painItems.forEach((el, i) => el.classList.toggle('visible', index === i + 2));
