@@ -53,6 +53,7 @@ const maskInner = maskWrap ? maskWrap.querySelector('.mask-inner') : null;
 let slideIndex             = 0;
 const TOTAL_SLIDES         = 5;
 let painSectionFirstShown  = false;
+let painHideTimer          = null;
 let isAnimating    = false;
 let scrollCooldown = false;
 
@@ -82,10 +83,10 @@ function applyState(index, prev) {
     resetCascade();
   }
 
-  // --- Overlay text (appears with expansion on slide 1) ---
-  if (overlayText) overlayText.classList.toggle('visible', index === 1);
+  // --- Overlay text — stays visible on pain slides (pain section covers it) ---
+  if (overlayText) overlayText.classList.toggle('visible', index >= 1);
 
-  // --- Pain section visibility + nav dots ---
+  // --- Pain section: slide up on entry, slide down on exit ---
   if (painSection) painSection.classList.toggle('active', index >= 2);
   painNavDots.forEach((dot, i) => dot.classList.toggle('active', index === i + 2));
 
@@ -96,17 +97,24 @@ function applyState(index, prev) {
   const newPainIdx  = (index >= 2) ? index - 2 : -1;
 
   if (newPainIdx < 0 && prevPainIdx >= 0) {
-    // Leaving pain section — instant hide, reset to clean scale(1) base
-    painImgs.forEach(img => {
-      img.style.transition = 'none';
-      img.classList.remove('active');
-      img.style.opacity    = '0';
-      img.style.transform  = 'scale(1)';
-    });
-    painImgs[0] && painImgs[0].offsetHeight;
-    painImgs.forEach(img => { img.style.transition = ''; });
+    // Leaving pain section — keep images visible during slide-down, reset after
+    if (painHideTimer) clearTimeout(painHideTimer);
+    painHideTimer = setTimeout(() => {
+      painHideTimer = null;
+      painImgs.forEach(img => {
+        img.style.transition = 'none';
+        img.classList.remove('active');
+        img.style.opacity    = '0';
+        img.style.transform  = 'scale(1)';
+      });
+      painImgs[0] && painImgs[0].offsetHeight;
+      painImgs.forEach(img => { img.style.transition = ''; });
+      painSectionFirstShown = false;
+    }, 900);
 
   } else if (newPainIdx >= 0) {
+    // Cancel any pending hide if user scrolls back in before timer fires
+    if (painHideTimer) { clearTimeout(painHideTimer); painHideTimer = null; }
     if (!painSectionFirstShown) {
       // First entry only: Ken Burns effect — snap to zoomed-in, then animate to normal
       painSectionFirstShown = true;

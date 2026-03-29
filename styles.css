@@ -297,12 +297,13 @@ body {
   display: flex;
   align-items: stretch;
   pointer-events: none;
-  visibility: hidden;
   background: #0f0f0f;
+  transform: translateY(100%);
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pain-section.active {
-  visibility: visible;
+  transform: translateY(0);
 }
 
 /* 60% image panel */
