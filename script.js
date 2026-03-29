@@ -4,6 +4,7 @@ const navActions         = document.getElementById('navActions');
 const heroImageWrapper   = document.getElementById('heroImageWrapper');
 const heroImageContainer = document.getElementById('heroImageContainer');
 const overlayText        = document.getElementById('overlayText');
+const painSection        = document.getElementById('painSection');
 const painItems          = document.querySelectorAll('.pain-item');
 const painImgs           = document.querySelectorAll('.pain-img');
 
@@ -48,8 +49,9 @@ const maskInner = maskWrap ? maskWrap.querySelector('.mask-inner') : null;
 
 // ===== Slide State Machine =====
 // 0 = hero, 1 = expand + cascade + overlay, 2/3/4 = pain points
-let slideIndex     = 0;
-const TOTAL_SLIDES = 5;
+let slideIndex             = 0;
+const TOTAL_SLIDES         = 5;
+let painSectionFirstShown  = false;
 let isAnimating    = false;
 let scrollCooldown = false;
 
@@ -82,9 +84,53 @@ function applyState(index, prev) {
   // --- Overlay text (appears with expansion on slide 1) ---
   if (overlayText) overlayText.classList.toggle('visible', index === 1);
 
+  // --- Pain section visibility (hides gradient overlay on non-pain slides) ---
+  if (painSection) painSection.classList.toggle('active', index >= 2);
+
   // --- Pain points ---
   painItems.forEach((el, i) => el.classList.toggle('visible', index === i + 2));
-  painImgs.forEach((img, i) => img.classList.toggle('active',  index === i + 2));
+
+  const prevPainIdx = (prev  >= 2) ? prev  - 2 : -1;
+  const newPainIdx  = (index >= 2) ? index - 2 : -1;
+
+  if (newPainIdx < 0 && prevPainIdx >= 0) {
+    // Leaving pain section — instant hide, reset to clean scale(1) base
+    painImgs.forEach(img => {
+      img.style.transition = 'none';
+      img.classList.remove('active');
+      img.style.opacity    = '0';
+      img.style.transform  = 'scale(1)';
+    });
+    painImgs[0] && painImgs[0].offsetHeight;
+    painImgs.forEach(img => { img.style.transition = ''; });
+
+  } else if (newPainIdx >= 0) {
+    if (!painSectionFirstShown) {
+      // First entry only: Ken Burns effect — snap to zoomed-in, then animate to normal
+      painSectionFirstShown = true;
+      painImgs.forEach(img => {
+        img.style.transition = 'none';
+        img.style.opacity    = '0';
+        img.style.transform  = 'scale(1.06)';
+        img.classList.remove('active');
+      });
+      painImgs[0] && painImgs[0].offsetHeight;
+      painImgs.forEach(img => { img.style.transition = ''; });
+      painImgs.forEach((img, i) => {
+        if (index === i + 2) {
+          img.style.opacity   = '1';
+          img.style.transform = 'scale(1)';
+        }
+      });
+    } else {
+      // Subsequent entries: clear inline overrides so CSS handles it, crossfade only
+      painImgs.forEach((img, i) => {
+        img.style.opacity   = '';
+        img.style.transform = '';
+        img.classList.toggle('active', index === i + 2);
+      });
+    }
+  }
 }
 
 function triggerCascadeOut() {
