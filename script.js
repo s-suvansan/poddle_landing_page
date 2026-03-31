@@ -6,8 +6,7 @@ const heroImageContainer = document.getElementById('heroImageContainer');
 const overlayText        = document.getElementById('overlayText');
 const painSection        = document.getElementById('painSection');
 const painItems          = document.querySelectorAll('.pain-item');
-const painImgs           = document.querySelectorAll('.pain-img');
-const painNavDots        = document.querySelectorAll('.pain-nav-dot');
+const painImgs           = document.querySelectorAll('.pain-img-group');
 
 // ===== Split hero text into character spans =====
 const cascadeLines = [];
@@ -73,7 +72,6 @@ initOverlayBlockReveal();
 // 0 = hero, 1 = expand + cascade + overlay, 2/3/4 = pain points
 let slideIndex             = 0;
 const TOTAL_SLIDES         = 5;
-let painSectionFirstShown  = false;
 let painHideTimer          = null;
 let isAnimating    = false;
 let scrollCooldown = false;
@@ -122,58 +120,37 @@ function applyState(index, prev) {
 
   // --- Pain section: slide up on entry, slide down on exit ---
   if (painSection) painSection.classList.toggle('active', index >= 2);
-  painNavDots.forEach((dot, i) => dot.classList.toggle('active', index === i + 2));
 
   // --- Pain points ---
-  painItems.forEach((el, i) => el.classList.toggle('visible', index === i + 2));
+  painItems.forEach((el, i) => {
+    el.classList.toggle('visible', index === i + 2);
+  });
 
   const prevPainIdx = (prev  >= 2) ? prev  - 2 : -1;
   const newPainIdx  = (index >= 2) ? index - 2 : -1;
 
   if (newPainIdx < 0 && prevPainIdx >= 0) {
-    // Leaving pain section — keep images visible during slide-down, reset after
+    // Leaving pain section — keep cards visible during slide-down, then clean up
     if (painHideTimer) clearTimeout(painHideTimer);
     painHideTimer = setTimeout(() => {
       painHideTimer = null;
-      painImgs.forEach(img => {
-        img.style.transition = 'none';
-        img.classList.remove('active');
-        img.style.opacity    = '0';
-        img.style.transform  = 'scale(1)';
+      painImgs.forEach(group => {
+        resetCards(group);
+        group.classList.remove('active');
       });
-      painImgs[0] && painImgs[0].offsetHeight;
-      painImgs.forEach(img => { img.style.transition = ''; });
-      painSectionFirstShown = false;
     }, 900);
 
   } else if (newPainIdx >= 0) {
-    // Cancel any pending hide if user scrolls back in before timer fires
     if (painHideTimer) { clearTimeout(painHideTimer); painHideTimer = null; }
-    if (!painSectionFirstShown) {
-      // First entry only: Ken Burns effect — snap to zoomed-in, then animate to normal
-      painSectionFirstShown = true;
-      painImgs.forEach(img => {
-        img.style.transition = 'none';
-        img.style.opacity    = '0';
-        img.style.transform  = 'scale(1.06)';
-        img.classList.remove('active');
-      });
-      painImgs[0] && painImgs[0].offsetHeight;
-      painImgs.forEach(img => { img.style.transition = ''; });
-      painImgs.forEach((img, i) => {
-        if (index === i + 2) {
-          img.style.opacity   = '1';
-          img.style.transform = 'scale(1)';
-        }
-      });
-    } else {
-      // Subsequent entries: clear inline overrides so CSS handles it, crossfade only
-      painImgs.forEach((img, i) => {
-        img.style.opacity   = '';
-        img.style.transform = '';
-        img.classList.toggle('active', index === i + 2);
-      });
-    }
+    painImgs.forEach((group, i) => {
+      if (i === newPainIdx) {
+        group.classList.add('active');
+        animateCardsIn(group);
+      } else {
+        resetCards(group);
+        group.classList.remove('active');
+      }
+    });
   }
 }
 
@@ -202,6 +179,8 @@ function resetCascade() {
     });
   });
 }
+
+
 
 // ===== Overlay sweep animation =====
 function triggerOverlayReveal() {
@@ -269,13 +248,62 @@ function resetOverlay() {
   }, FADE);
 }
 
+// ===== Card animations =====
+function animateCardsIn(group) {
+  group.querySelectorAll('.pain-card-img').forEach((card, i) => {
+    card.getAnimations().forEach(a => a.cancel());
+    card.animate(
+      [
+        { opacity: 0, transform: 'perspective(700px) rotateX(72deg)' },
+        { opacity: 1, transform: 'perspective(700px) rotateX(-5deg)', offset: 0.65 },
+        { opacity: 1, transform: 'perspective(700px) rotateX(0deg)'  }
+      ],
+      { duration: 560, delay: i * 80, fill: 'both', easing: 'ease-out' }
+    );
+  });
+}
+
+function resetCards(group) {
+  group.querySelectorAll('.pain-card-img').forEach(card => {
+    card.getAnimations().forEach(a => a.cancel());
+  });
+}
+
 // ===== Wheel input =====
+// macOS trackpad sends momentum (inertia) events for 500–1500ms after the
+// finger lifts. Those events only decelerate. A real new gesture accelerates.
+// Strategy: fire only when deltaY is LARGER than the previous event (accelerating)
+// OR when there has been a long gap (>300ms) since the last event.
+let prevWheelAbs  = 0;
+let prevWheelTime = 0;
+
 window.addEventListener('wheel', (e) => {
   e.preventDefault();
+
+  const abs = Math.abs(e.deltaY);
+  const now = Date.now();
+  const gap = now - prevWheelTime;
+
+  if (abs < 2) return; // ignore sub-pixel noise
+
+  const isAccelerating = abs > prevWheelAbs; // true on a real new gesture
+  const isAfterPause   = gap > 300;          // true after finger fully lifted
+
+  // Always update so momentum decay is tracked during and after cooldown
+  prevWheelAbs  = abs;
+  prevWheelTime = now;
+
   if (scrollCooldown) return;
+  if (!isAccelerating && !isAfterPause) return; // momentum — ignore
+
+  const dir  = e.deltaY > 0 ? 1 : -1;
+  const next = Math.max(0, Math.min(TOTAL_SLIDES - 1, slideIndex + dir));
+
+  // Short cooldown within pain section (no animation), longer for section transitions
+  const withinPain = slideIndex >= 2 && next >= 2;
   scrollCooldown = true;
-  goToSlide(slideIndex + (e.deltaY > 0 ? 1 : -1));
-  setTimeout(() => { scrollCooldown = false; }, 700);
+  goToSlide(next);
+  setTimeout(() => { scrollCooldown = false; }, withinPain ? 500 : 1000);
 }, { passive: false });
 
 // ===== Touch input =====
@@ -288,8 +316,8 @@ window.addEventListener('touchstart', (e) => {
 window.addEventListener('touchend', (e) => {
   if (scrollCooldown) return;
   const diff = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(diff) < 30) return;
+  if (Math.abs(diff) < 40) return;
   scrollCooldown = true;
   goToSlide(slideIndex + (diff > 0 ? 1 : -1));
-  setTimeout(() => { scrollCooldown = false; }, 700);
+  setTimeout(() => { scrollCooldown = false; }, 950);
 }, { passive: true });

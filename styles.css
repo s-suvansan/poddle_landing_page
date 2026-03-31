@@ -15,6 +15,7 @@ body {
   background: #ffffff;
   overflow: hidden;
   height: 100vh;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -397,11 +398,9 @@ body {
   right: 0;
   bottom: 0;
   z-index: 8;
-  display: flex;
-  align-items: stretch;
-  pointer-events: none;
-  background: #0f0f0f;
-  overflow: hidden;
+  background: #141414;
+  overflow: clip; /* clip — does NOT create a scroll container, so wheel events are never consumed here */
+  pointer-events: none; /* pass wheel events straight to window; nothing inside is clickable */
   transform: translateY(100%);
   border-radius: 56px 56px 0 0;
   transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1),
@@ -413,118 +412,76 @@ body {
   border-radius: 0;
 }
 
-/* 60% image panel */
-.pain-images-panel {
-  width: 60%;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Images fill the full panel */
-.pain-img {
+/* Image group — visibility isolates groups; cards animate within */
+.pain-img-group {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0;
-  opacity: 0;
-  transform: scale(1);
-  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.pain-img.active {
-  opacity: 1;
-}
-
-/* Gradient bridge — image bleeds into the dark text area */
-.pain-images-panel::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to right,
-    transparent 45%,
-    rgba(15, 15, 15, 0.6) 72%,
-    #0f0f0f 100%
-  );
+  visibility: hidden;
   pointer-events: none;
 }
 
-/* 40% text panel */
-.pain-text-panel {
-  width: 40%;
-  position: relative;
+.pain-img-group.active {
+  visibility: visible;
 }
 
-/* Step counter */
-.pain-eyebrow {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #FF2D78;
-  margin-bottom: 16px;
+/* Base card style */
+.pain-card-img {
+  position: absolute;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.5),
+              0 24px 64px rgba(0, 0, 0, 0.6),
+              0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  object-fit: cover;
+  user-select: none;
+  max-width: unset;
+  transform-origin: bottom center;
 }
 
+/* Pain 1 — two overlapping cards from bottom */
+.pain-card-img--1a { left: 4%;  bottom: -4%; width: 50%; height: 53%; }
+.pain-card-img--1b { left: 42%; bottom: -4%; width: 54%; height: 47%; }
+
+/* Pain 2 — two side-by-side cards from bottom */
+.pain-card-img--2a { left: 4%;  bottom: -4%; width: 55%; height: 52%; }
+.pain-card-img--2b { right: 3%; bottom: -4%; width: 41%; height: 46%; }
+
+/* Pain 3 — single wide card from bottom */
+.pain-card-img--3  { left: 4%;  bottom: -4%; width: 92%; height: 56%; }
+
+/* Text items — top-left, not vertically centred */
 .pain-item {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 50px 0 44px;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 150px 60px 0;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+  transition: opacity 0.45s ease;
 }
 
 .pain-item.visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* Navigation dots */
-.pain-nav-dots {
-  position: absolute;
-  bottom: 12%;
-  left: 44px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.pain-nav-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  background: transparent;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-}
-
-.pain-nav-dot.active {
-  background: #FF2D78;
-  border-color: #FF2D78;
-  transform: scale(1.25);
-}
 
 .pain-title {
-  font-size: clamp(28px, 3.2vw, 46px);
+  font-size: clamp(32px, 3.8vw, 56px);
   font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -1px;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
   margin-bottom: 20px;
   color: #fff;
+  max-width: 700px;
 }
 
 .pain-body {
-  font-size: clamp(15px, 1.5vw, 18px);
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
-  max-width: 480px;
+  max-width: 540px;
 }
 
 .hero-image-wrapper.expanded {
