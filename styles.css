@@ -443,12 +443,12 @@ body {
 .pain-card-img--1a { left: 4%;  bottom: -4%; width: 50%; height: 53%; }
 .pain-card-img--1b { left: 42%; bottom: -4%; width: 54%; height: 47%; }
 
-/* Pain 2 — two side-by-side cards from bottom */
-.pain-card-img--2a { left: 4%;  bottom: -4%; width: 55%; height: 52%; }
-.pain-card-img--2b { right: 3%; bottom: -4%; width: 41%; height: 46%; }
+/* Pain 2 — single wide card */
+.pain-card-img--2a { left: 4%; bottom: -4%; width: 92%; height: 56%; }
 
-/* Pain 3 — single wide card from bottom */
-.pain-card-img--3  { left: 4%;  bottom: -4%; width: 92%; height: 56%; }
+/* Pain 3 — two overlapping cards */
+.pain-card-img--3a { left: 4%;  bottom: -4%; width: 50%; height: 53%; }
+.pain-card-img--3b { left: 42%; bottom: -4%; width: 54%; height: 47%; }
 
 /* Text items — top-left, not vertically centred */
 .pain-item {
