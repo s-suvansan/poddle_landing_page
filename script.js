@@ -73,6 +73,7 @@ initOverlayBlockReveal();
 let slideIndex             = 0;
 const TOTAL_SLIDES         = 5;
 let painHideTimer          = null;
+let contentRevealTimer     = null;
 let isAnimating    = false;
 let scrollCooldown = false;
 let overlayAnimated = false;
@@ -121,14 +122,22 @@ function applyState(index, prev) {
   // --- Pain section: slide up on entry, slide down on exit ---
   if (painSection) painSection.classList.toggle('active', index >= 2);
 
-  // --- Pain points ---
-  painItems.forEach((el, i) => {
-    el.classList.toggle('visible', index === i + 2);
-  });
+  // Clear any pending staged reveal (e.g. user scrolled back quickly)
+  if (contentRevealTimer) { clearTimeout(contentRevealTimer); contentRevealTimer = null; }
 
+  const isEnteringSection = prev < 2 && index >= 2;
   const prevPainIdx = (prev  >= 2) ? prev  - 2 : -1;
   const newPainIdx  = (index >= 2) ? index - 2 : -1;
 
+  // --- Hide stale pain text immediately ---
+  painItems.forEach((el, i) => {
+    if (i + 2 !== index && el.classList.contains('visible')) {
+      resetText(el);
+      el.classList.remove('visible');
+    }
+  });
+
+  // --- Image groups: hide stale / handle exit ---
   if (newPainIdx < 0 && prevPainIdx >= 0) {
     // Leaving pain section — keep cards visible during slide-down, then clean up
     if (painHideTimer) clearTimeout(painHideTimer);
@@ -139,18 +148,38 @@ function applyState(index, prev) {
         group.classList.remove('active');
       });
     }, 900);
-
   } else if (newPainIdx >= 0) {
     if (painHideTimer) { clearTimeout(painHideTimer); painHideTimer = null; }
+    // Hide all non-active groups immediately
     painImgs.forEach((group, i) => {
-      if (i === newPainIdx) {
-        group.classList.add('active');
-        animateCardsIn(group);
-      } else {
+      if (i !== newPainIdx) {
         resetCards(group);
         group.classList.remove('active');
       }
     });
+  }
+
+  // --- Reveal new pain content: wait for black screen to fill on first entry ---
+  if (newPainIdx >= 0) {
+    const revealContent = () => {
+      const el    = painItems[newPainIdx];
+      const group = painImgs[newPainIdx];
+      if (el && !el.classList.contains('visible')) {
+        el.classList.add('visible');
+        animateTextIn(el);
+      }
+      if (group) {
+        group.classList.add('active');
+        animateCardsIn(group);
+      }
+    };
+
+    if (isEnteringSection) {
+      // Black screen fills first (~900ms), then content pops in
+      contentRevealTimer = setTimeout(revealContent, 500);
+    } else {
+      revealContent();
+    }
   }
 }
 
@@ -248,17 +277,48 @@ function resetOverlay() {
   }, FADE);
 }
 
+// ===== Text animations =====
+function animateTextIn(item) {
+  ['.pain-title', '.pain-body'].forEach((sel, i) => {
+    const el = item.querySelector(sel);
+    if (!el) return;
+    el.getAnimations().forEach(a => a.cancel());
+    el.style.opacity   = '0';
+    el.style.transform = 'perspective(700px) rotateX(72deg)';
+    el.animate(
+      [
+        { opacity: 0, transform: 'perspective(700px) rotateX(72deg)' },
+        { opacity: 1, transform: 'perspective(700px) rotateX(-5deg)', offset: 0.65 },
+        { opacity: 1, transform: 'perspective(700px) rotateX(0deg)'  }
+      ],
+      { duration: 560, delay: i * 60, fill: 'forwards', easing: 'ease-out' }
+    );
+  });
+}
+
+function resetText(item) {
+  ['.pain-title', '.pain-body'].forEach(sel => {
+    const el = item.querySelector(sel);
+    if (!el) return;
+    el.getAnimations().forEach(a => a.cancel());
+    el.style.opacity   = '';
+    el.style.transform = '';
+  });
+}
+
 // ===== Card animations =====
 function animateCardsIn(group) {
   group.querySelectorAll('.pain-card-img').forEach((card, i) => {
     card.getAnimations().forEach(a => a.cancel());
+    card.style.opacity   = '0';
+    card.style.transform = 'perspective(700px) rotateX(72deg)';
     card.animate(
       [
         { opacity: 0, transform: 'perspective(700px) rotateX(72deg)' },
         { opacity: 1, transform: 'perspective(700px) rotateX(-5deg)', offset: 0.65 },
         { opacity: 1, transform: 'perspective(700px) rotateX(0deg)'  }
       ],
-      { duration: 560, delay: i * 80, fill: 'both', easing: 'ease-out' }
+      { duration: 560, delay: i * 80, fill: 'forwards', easing: 'ease-out' }
     );
   });
 }
@@ -266,6 +326,8 @@ function animateCardsIn(group) {
 function resetCards(group) {
   group.querySelectorAll('.pain-card-img').forEach(card => {
     card.getAnimations().forEach(a => a.cancel());
+    card.style.opacity   = '';
+    card.style.transform = '';
   });
 }
 
