@@ -1,3 +1,84 @@
+// ===== Beam Background (reusable) =====
+function initBeams(canvas) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const TOTAL_BEAMS = 30;
+  let beams = [];
+  let w, h;
+
+  function createBeam() {
+    return {
+      x: Math.random() * w * 1.5 - w * 0.25,
+      y: Math.random() * h * 1.5 - h * 0.25,
+      width: 30 + Math.random() * 60,
+      length: h * 2.5,
+      angle: -35 + Math.random() * 10,
+      speed: 0.6 + Math.random() * 1.2,
+      opacity: 0.06 + Math.random() * 0.08,
+      hue: 190 + Math.random() * 70,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: 0.02 + Math.random() * 0.03,
+    };
+  }
+
+  function resetBeam(beam, index) {
+    const col = index % 3;
+    const spacing = w / 3;
+    beam.y = h + 100;
+    beam.x = col * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
+    beam.width = 100 + Math.random() * 100;
+    beam.speed = 0.5 + Math.random() * 0.4;
+    beam.hue = 190 + (index * 70) / TOTAL_BEAMS;
+    beam.opacity = 0.08 + Math.random() * 0.06;
+  }
+
+  function drawBeam(beam) {
+    ctx.save();
+    ctx.translate(beam.x, beam.y);
+    ctx.rotate((beam.angle * Math.PI) / 180);
+    const op = beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2);
+    const g = ctx.createLinearGradient(0, 0, 0, beam.length);
+    g.addColorStop(0,   `hsla(${beam.hue},85%,65%,0)`);
+    g.addColorStop(0.1, `hsla(${beam.hue},85%,65%,${op * 0.5})`);
+    g.addColorStop(0.4, `hsla(${beam.hue},85%,65%,${op})`);
+    g.addColorStop(0.6, `hsla(${beam.hue},85%,65%,${op})`);
+    g.addColorStop(0.9, `hsla(${beam.hue},85%,65%,${op * 0.5})`);
+    g.addColorStop(1,   `hsla(${beam.hue},85%,65%,0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
+    ctx.restore();
+  }
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    w = canvas.offsetWidth;
+    h = canvas.offsetHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    beams = Array.from({ length: TOTAL_BEAMS }, createBeam);
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.filter = 'blur(35px)';
+    beams.forEach(function(beam, i) {
+      beam.y -= beam.speed;
+      beam.pulse += beam.pulseSpeed;
+      if (beam.y + beam.length < -100) resetBeam(beam, i);
+      drawBeam(beam);
+    });
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  animate();
+}
+
+initBeams(document.getElementById('heroBgCanvas'));
+initBeams(document.getElementById('painBgCanvas'));
+
 // ===== DOM Elements =====
 const slideOne           = document.getElementById('slideOne');
 const navActions         = document.getElementById('navActions');
