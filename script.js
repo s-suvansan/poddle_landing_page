@@ -67,6 +67,7 @@ function applyState(index, prev) {
     navActions.classList.add('visible');
     if (maskInner) maskInner.classList.add('mask-hidden');
     if (prev === 0) triggerCascadeOut();
+    if (heroSlider.pause) heroSlider.pause();
   } else {
     slideOne.classList.remove('collapsed');
     heroImageWrapper.classList.remove('expanded');
@@ -74,6 +75,7 @@ function applyState(index, prev) {
     navActions.classList.remove('visible');
     if (maskInner) maskInner.classList.remove('mask-hidden');
     resetCascade();
+    if (heroSlider.resume) heroSlider.resume();
   }
 }
 
@@ -153,3 +155,40 @@ window.addEventListener('touchend', (e) => {
   goToSlide(slideIndex + (diff > 0 ? 1 : -1));
   setTimeout(() => { scrollCooldown = false; }, 950);
 }, { passive: true });
+
+// ===== Hero Image Slider =====
+const heroSlider = (function () {
+  const slides  = document.querySelectorAll('.hero-slide');
+  const btnPrev = document.getElementById('sliderPrev');
+  const btnNext = document.getElementById('sliderNext');
+  if (!slides.length) return {};
+
+  let current   = 0;
+  let animating = false;
+  let autoTimer = null;
+
+  function goTo(next) {
+    if (animating || next === current) return;
+    animating = true;
+    slides[current].classList.add('exit');
+    slides[current].classList.remove('active');
+    slides[next].classList.add('active');
+    current = next;
+    setTimeout(() => {
+      slides.forEach(s => s.classList.remove('exit'));
+      animating = false;
+    }, 650);
+  }
+
+  function next() { goTo((current + 1) % slides.length); }
+  function prev() { goTo((current - 1 + slides.length) % slides.length); }
+
+  function pause()  { clearInterval(autoTimer); autoTimer = null; }
+  function resume() { if (!autoTimer) autoTimer = setInterval(next, 3500); }
+
+  btnNext.addEventListener('click', () => { next(); pause(); resume(); });
+  btnPrev.addEventListener('click', () => { prev(); pause(); resume(); });
+
+  resume();
+  return { pause, resume };
+})();

@@ -46,7 +46,15 @@
   <!-- Single image — starts at 85% width, top ~30% visible below hero on load -->
   <div class="hero-image-wrapper" id="heroImageWrapper">
     <div class="hero-image-container" id="heroImageContainer">
-      <img src="hero1.jpg" alt="Hero" class="hero-full-img" id="heroFullImg">
+      <div class="hero-slider" id="heroSlider">
+        <img src="hero_images/restaurant.png"  class="hero-slide active" alt="Restaurant">
+        <img src="hero_images/takeaway.png"    class="hero-slide" alt="Takeaway">
+        <img src="hero_images/clubandbar.png"  class="hero-slide" alt="Club and Bar">
+        <img src="hero_images/coffeeshop.png"  class="hero-slide" alt="Coffee Shop">
+      </div>
+      <div class="slider-tint"></div>
+      <button class="slider-arrow slider-arrow--prev" id="sliderPrev">&#8249;</button>
+      <button class="slider-arrow slider-arrow--next" id="sliderNext">&#8250;</button>
     </div>
   </div>
 
