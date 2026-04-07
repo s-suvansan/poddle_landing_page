@@ -400,6 +400,21 @@ body {
   border-radius: 0;
 }
 
+.hero-image-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.92);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.hero-image-container.expanded::after {
+  opacity: 1;
+}
+
 .hero-slider {
   position: relative;
   width: 100%;
