@@ -156,11 +156,65 @@ window.addEventListener('touchend', (e) => {
   setTimeout(() => { scrollCooldown = false; }, 950);
 }, { passive: true });
 
+// ===== Morphing Label =====
+const morphLabel = (function () {
+  const text1 = document.getElementById('morphText1');
+  const text2 = document.getElementById('morphText2');
+  if (!text1 || !text2) return { to: () => {} };
+
+  const MORPH_TIME = 1.2; // seconds
+  let animId   = null;
+  let busy     = false;
+
+  function setStyles(fraction) {
+    const inv = 1 - fraction;
+    text2.style.filter  = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+    text2.style.opacity = Math.pow(fraction, 0.4);
+    text1.style.filter  = `blur(${Math.min(8 / inv - 8, 100)}px)`;
+    text1.style.opacity = Math.pow(inv, 0.4);
+  }
+
+  // Init
+  text1.style.opacity = '1';
+  text1.style.filter  = 'none';
+  text2.style.opacity = '0';
+  text2.style.filter  = 'blur(100px)';
+
+  function to(newText) {
+    if (text1.textContent === newText && !busy) return;
+    text2.textContent = newText;
+    busy = true;
+    cancelAnimationFrame(animId);
+    let start = null;
+
+    function animate(ts) {
+      if (!start) start = ts;
+      const fraction = Math.min((ts - start) / (MORPH_TIME * 1000), 1);
+      setStyles(fraction);
+      if (fraction < 1) {
+        animId = requestAnimationFrame(animate);
+      } else {
+        // Swap: text1 becomes the new text, reset text2
+        text1.textContent = newText;
+        text1.style.filter  = 'none';
+        text1.style.opacity = '1';
+        text2.style.filter  = 'blur(100px)';
+        text2.style.opacity = '0';
+        busy = false;
+      }
+    }
+    animId = requestAnimationFrame(animate);
+  }
+
+  return { to };
+})();
+
 // ===== Hero Image Slider =====
 const heroSlider = (function () {
   const slides  = document.querySelectorAll('.hero-slide');
   const btnPrev = document.getElementById('sliderPrev');
   const btnNext = document.getElementById('sliderNext');
+  const labels  = ['Restaurants', 'Takeaway', 'Clubs & Bars', 'Cafés & Coffee Shops'];
   if (!slides.length) return {};
 
   let current   = 0;
@@ -189,6 +243,8 @@ const heroSlider = (function () {
     slides[current].classList.remove('active');
     incoming.classList.add('active');
     current = nextIdx;
+
+    morphLabel.to(labels[current]);
 
     setTimeout(() => {
       slides.forEach(s => {
