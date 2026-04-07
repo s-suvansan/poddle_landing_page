@@ -272,3 +272,92 @@ const heroSlider = (function () {
   resume();
   return { pause, resume };
 })();
+
+// ===== Testimonials =====
+(function () {
+  const data = [
+    {
+      quote: "Within the first month, three new tables told us they came in because a regular recommended us. Poddle made that happen.",
+      name: "Marco Ricci",
+      role: "Owner / Marco's Kitchen",
+      avatar: ""
+    },
+    {
+      quote: "We went from zero Google reviews to 47 in six weeks. Our regulars finally had a reason to share us.",
+      name: "Priya Nair",
+      role: "Owner / Spice Route",
+      avatar: ""
+    },
+    {
+      quote: "It's word-of-mouth, but switched on. New customers arrive every week and I haven't spent a penny on ads.",
+      name: "James Holloway",
+      role: "Manager / The Daily Grind",
+      avatar: ""
+    }
+  ];
+
+  const indexEl  = document.getElementById('testiIndex');
+  const quoteEl  = document.getElementById('testiQuote');
+  const authorEl = document.getElementById('testiAuthor');
+  const nameEl   = document.getElementById('testiName');
+  const roleEl   = document.getElementById('testiRole');
+  const countEl  = document.getElementById('testiCount');
+  const linesEl  = document.getElementById('testiLines');
+  const prevBtn  = document.getElementById('testiPrev');
+  const nextBtn  = document.getElementById('testiNext');
+  if (!indexEl) return;
+
+  let active       = 0;
+  let transitioning = false;
+
+  // Build line buttons
+  data.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'testi-line-btn' + (i === 0 ? ' active' : '');
+    btn.innerHTML = '<span></span>';
+    btn.addEventListener('click', () => goTo(i));
+    linesEl.appendChild(btn);
+  });
+
+  function render(i) {
+    const t = data[i];
+    indexEl.textContent = String(i + 1).padStart(2, '0');
+    quoteEl.textContent = t.quote;
+    nameEl.textContent  = t.name;
+    roleEl.textContent  = t.role;
+    countEl.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(data.length).padStart(2, '0');
+    linesEl.querySelectorAll('.testi-line-btn').forEach((b, j) => {
+      b.classList.toggle('active', j === i);
+    });
+  }
+
+  function goTo(i) {
+    if (transitioning || i === active) return;
+    transitioning = true;
+    quoteEl.classList.add('transitioning');
+    authorEl.classList.add('transitioning');
+    setTimeout(() => {
+      active = i;
+      render(active);
+      quoteEl.classList.remove('transitioning');
+      authorEl.classList.remove('transitioning');
+      transitioning = false;
+    }, 300);
+  }
+
+  let autoTimer = null;
+
+  function startAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => {
+      goTo(active === data.length - 1 ? 0 : active + 1);
+    }, 4000);
+  }
+
+  prevBtn.addEventListener('click', () => { goTo(active === 0 ? data.length - 1 : active - 1); startAuto(); });
+  nextBtn.addEventListener('click', () => { goTo(active === data.length - 1 ? 0 : active + 1); startAuto(); });
+  linesEl.addEventListener('click', () => startAuto());
+
+  render(0);
+  startAuto();
+})();
