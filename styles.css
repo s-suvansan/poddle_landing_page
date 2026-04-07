@@ -164,17 +164,6 @@ body {
   pointer-events: none;
 }
 
-/* Hero beam background canvas — full-screen fixed, fades when hero collapses */
-.hero-bg-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  filter: blur(15px);
-}
-
 /* Hero content area */
 .hero {
   position: relative;
@@ -423,17 +412,6 @@ body {
 .pain-section.active {
   transform: translateY(0);
   border-radius: 0;
-}
-
-/* Pain section beam canvas — sits on top of dark bg, below all content */
-.pain-bg-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(15px);
 }
 
 /* Image group — visibility isolates groups; cards animate within */
