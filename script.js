@@ -167,21 +167,45 @@ const heroSlider = (function () {
   let animating = false;
   let autoTimer = null;
 
-  function goTo(next) {
-    if (animating || next === current) return;
+  function goTo(nextIdx, dir = 'next') {
+    if (animating || nextIdx === current) return;
     animating = true;
-    slides[current].classList.add('exit');
+
+    const incoming = slides[nextIdx];
+
+    if (dir === 'prev') {
+      // Position incoming off-screen to the left instantly
+      incoming.style.transition = 'none';
+      incoming.style.transform  = 'translateX(-100%)';
+      incoming.offsetHeight; // reflow
+      incoming.style.transition = '';
+      incoming.style.transform  = '';
+
+      slides[current].classList.add('exit-right');
+    } else {
+      slides[current].classList.add('exit');
+    }
+
     slides[current].classList.remove('active');
-    slides[next].classList.add('active');
-    current = next;
+    incoming.classList.add('active');
+    current = nextIdx;
+
     setTimeout(() => {
-      slides.forEach(s => s.classList.remove('exit'));
+      slides.forEach(s => {
+        if (s.classList.contains('exit')) {
+          s.style.transition = 'none';
+          s.classList.remove('exit');
+          s.offsetHeight;
+          s.style.transition = '';
+        }
+        s.classList.remove('exit-right'); // already at translateX(100%) — no snap needed
+      });
       animating = false;
-    }, 650);
+    }, 700);
   }
 
-  function next() { goTo((current + 1) % slides.length); }
-  function prev() { goTo((current - 1 + slides.length) % slides.length); }
+  function next() { goTo((current + 1) % slides.length, 'next'); }
+  function prev() { goTo((current - 1 + slides.length) % slides.length, 'prev'); }
 
   function pause()  { clearInterval(autoTimer); autoTimer = null; }
   function resume() { if (!autoTimer) autoTimer = setInterval(next, 3500); }

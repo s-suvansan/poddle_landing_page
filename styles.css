@@ -419,6 +419,10 @@ body {
   transform: translateX(-100%);
 }
 
+.hero-slide.exit-right {
+  transform: translateX(100%);
+}
+
 .slider-tint {
   position: absolute;
   inset: 0;
