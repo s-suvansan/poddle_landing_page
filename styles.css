@@ -10,7 +10,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
   color: #1a1a1a;
   background: #ffffff;
   overflow: hidden;
@@ -553,11 +553,18 @@ body {
   font-size: clamp(20px, 2.4vw, 30px);
   font-weight: 300;
   line-height: 1.6;
-  min-height: calc(1.6em * 3);
   color: #1a1a1a;
   letter-spacing: -0.3px;
   margin: 0 0 28px;
   transition: opacity 0.3s ease;
+}
+
+.testi-quote::before {
+  content: '\201C';
+}
+
+.testi-quote::after {
+  content: '\201D';
 }
 
 .testi-quote.transitioning {
