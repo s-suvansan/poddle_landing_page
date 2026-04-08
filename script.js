@@ -44,11 +44,21 @@ const maskWrap  = document.querySelector('.mask-wrap');
 const maskInner = maskWrap ? maskWrap.querySelector('.mask-inner') : null;
 
 // ===== Slide State Machine =====
-// 0 = hero, 1 = expand + cascade
+// 0 = hero, 1 = expanded + testimonials (body unlocks after animation)
 let slideIndex     = 0;
 const TOTAL_SLIDES = 2;
 let isAnimating    = false;
 let scrollCooldown = false;
+
+function lockScroll() {
+  document.body.classList.remove('scrollable');
+  window.scrollTo(0, 0);
+}
+
+function unlockScroll() {
+  document.body.classList.add('scrollable');
+  scrollCooldown = false;
+}
 
 function goToSlide(next) {
   next = Math.max(0, Math.min(TOTAL_SLIDES - 1, next));
@@ -59,7 +69,6 @@ function goToSlide(next) {
 }
 
 function applyState(index, prev) {
-  // --- Hero / image expansion ---
   if (index >= 1) {
     slideOne.classList.add('collapsed');
     heroImageWrapper.classList.add('expanded');
@@ -68,7 +77,10 @@ function applyState(index, prev) {
     if (maskInner) maskInner.classList.add('mask-hidden');
     if (prev === 0) triggerCascadeOut();
     if (heroSlider.pause) heroSlider.pause();
+    // Unlock scroll after expand animation so user can scroll to problem section
+    setTimeout(() => unlockScroll(), 900);
   } else {
+    lockScroll();
     slideOne.classList.remove('collapsed');
     heroImageWrapper.classList.remove('expanded');
     heroImageContainer.classList.remove('expanded');
@@ -114,6 +126,17 @@ let prevWheelAbs  = 0;
 let prevWheelTime = 0;
 
 window.addEventListener('wheel', (e) => {
+  // Once scroll is unlocked, allow natural scroll except when user scrolls up past the top
+  if (document.body.classList.contains('scrollable')) {
+    if (window.scrollY === 0 && e.deltaY < 0 && slideIndex === 1 && !scrollCooldown) {
+      e.preventDefault();
+      scrollCooldown = true;
+      goToSlide(0);
+      setTimeout(() => { scrollCooldown = false; }, 1000);
+    }
+    return;
+  }
+
   e.preventDefault();
 
   const abs = Math.abs(e.deltaY);
@@ -148,6 +171,17 @@ window.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 window.addEventListener('touchend', (e) => {
+  if (document.body.classList.contains('scrollable')) {
+    if (window.scrollY === 0 && slideIndex === 1) {
+      const diff = touchStartY - e.changedTouches[0].clientY;
+      if (diff < -40 && !scrollCooldown) {
+        scrollCooldown = true;
+        goToSlide(0);
+        setTimeout(() => { scrollCooldown = false; }, 950);
+      }
+    }
+    return;
+  }
   if (scrollCooldown) return;
   const diff = touchStartY - e.changedTouches[0].clientY;
   if (Math.abs(diff) < 40) return;
@@ -360,4 +394,25 @@ const heroSlider = (function () {
 
   render(0);
   startAuto();
+})();
+
+// ===== Bento grid staggered entrance =====
+(function () {
+  const cards = document.querySelectorAll('[data-bento]');
+  if (!cards.length || !('IntersectionObserver' in window)) {
+    cards.forEach(c => c.classList.add('in-view'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const card = entry.target;
+      const index = Array.from(cards).indexOf(card);
+      setTimeout(() => card.classList.add('in-view'), index * 90);
+      observer.unobserve(card);
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+  cards.forEach(card => observer.observe(card));
 })();
