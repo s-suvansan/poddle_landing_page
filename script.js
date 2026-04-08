@@ -77,9 +77,13 @@ function applyState(index, prev) {
     if (maskInner) maskInner.classList.add('mask-hidden');
     if (prev === 0) triggerCascadeOut();
     if (heroSlider.pause) heroSlider.pause();
-    // Unlock scroll after expand animation so user can scroll to problem section
-    setTimeout(() => unlockScroll(), 900);
+    // After expand animation: switch wrapper to in-flow and unlock scroll
+    setTimeout(() => {
+      heroImageWrapper.classList.add('in-flow');
+      unlockScroll();
+    }, 900);
   } else {
+    heroImageWrapper.classList.remove('in-flow');
     lockScroll();
     slideOne.classList.remove('collapsed');
     heroImageWrapper.classList.remove('expanded');
